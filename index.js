@@ -15,7 +15,6 @@ function handleClick() {
         .then(data => {
             remainingText.textContent = `Remaining cards: ${data.remaining}`
             deckId = data.deck_id
-            console.log(deckId)
         })
 }
 
@@ -69,4 +68,3 @@ function determineCardWinner(card1, card2) {
         return "War!"
     }
 }
-
