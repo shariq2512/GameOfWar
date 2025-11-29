@@ -9,16 +9,31 @@ const remainingText = document.getElementById("remaining")
 const computerScoreEl = document.getElementById("computer-score")
 const myScoreEl = document.getElementById("my-score")
 
-function handleClick() {
+function resetUI() {
+    computerScore = 0
+    myScore = 0
+    cardsContainer.children[0].innerHTML = ''
+    cardsContainer.children[1].innerHTML = ''
+    header.textContent = 'Game of War'
+    computerScoreEl.textContent = `Computer score: ${computerScore}`
+    myScoreEl.textContent = `My score: ${myScore}`
+
+}
+
+function drawNewDeck() {
     fetch("https://apis.scrimba.com/deckofcards/api/deck/new/shuffle/")
         .then(res => res.json())
         .then(data => {
+            resetUI()
             remainingText.textContent = `Remaining cards: ${data.remaining}`
             deckId = data.deck_id
+
+            newDeckBtn.disabled = true
+            drawCardBtn.disabled = false
         })
 }
 
-newDeckBtn.addEventListener("click", handleClick)
+newDeckBtn.addEventListener("click", drawNewDeck)
 
 drawCardBtn.addEventListener("click", () => {
     fetch(`https://apis.scrimba.com/deckofcards/api/deck/${deckId}/draw/?count=2`)
@@ -26,16 +41,18 @@ drawCardBtn.addEventListener("click", () => {
         .then(data => {
             remainingText.textContent = `Remaining cards: ${data.remaining}`
             cardsContainer.children[0].innerHTML = `
-                <img src=${data.cards[0].image} class="card" />
+                <img src=${data.cards[0]?.image || ""} class="card" />
             `
+
             cardsContainer.children[1].innerHTML = `
-                <img src=${data.cards[1].image} class="card" />
+                ${data.cards[1] ? `<img src=${data.cards[1].image} class="card" />` : ""}
             `
             const winnerText = determineCardWinner(data.cards[0], data.cards[1])
             header.textContent = winnerText
             
             if (data.remaining === 0) {
                 drawCardBtn.disabled = true
+                newDeckBtn.disabled = false
                 if (computerScore > myScore) {
                     // display "The computer won the game!"
                     header.textContent = "The computer won the game!"
